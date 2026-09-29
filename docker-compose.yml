@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: meecore-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: meecore
+      POSTGRES_USER: meecore
+      POSTGRES_PASSWORD: meecore
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    ports:
+      - "127.0.0.1:5432:5432"
+
+volumes:
+  postgres_data:
