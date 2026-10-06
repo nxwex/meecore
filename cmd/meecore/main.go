@@ -12,6 +12,7 @@ import (
 	"github.com/nxwex/meecore/internal/docker"
 	"github.com/nxwex/meecore/internal/node"
 	"github.com/nxwex/meecore/internal/server"
+	"github.com/nxwex/meecore/internal/service"
 	"github.com/nxwex/meecore/internal/storage/postgres"
 )
 
@@ -34,7 +35,12 @@ func main() {
 	}
 	defer dockerClient.Close()
 
-	httpServer := server.New(cfg.HTTPAddr, nodes, dockerClient)
+	templates, err := service.LoadTemplates("templates")
+	if err != nil {
+		log.Fatalf("load templates error: %v", err)
+	}
+
+	httpServer := server.New(cfg.HTTPAddr, nodes, dockerClient, templates, db)
 
 	serverErr := make(chan error, 1)
 

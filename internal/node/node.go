@@ -19,4 +19,5 @@ type Node struct {
 
 type NodeRepository interface {
 	Get(ctx context.Context, id int64) (*Node, error)
+	GetAll(ctx context.Context) ([]Node, error)
 }

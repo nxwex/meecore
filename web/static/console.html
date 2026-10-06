@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>meecore - console</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0b0d10;
+            color: #e8eaed;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 56px;
+            flex: 0 0 56px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 20px;
+
+            border-bottom: 1px solid #20242a;
+            background: #111419;
+        }
+
+        .title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .status.connected {
+            color: #3fb950;
+        }
+
+        .status.error {
+            color: #f85149;
+        }
+
+        .back {
+            color: #9da5b1;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back:hover {
+            color: #fff;
+        }
+
+        #console {
+            flex: 1 1 auto;
+            min-height: 0;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            padding: 16px;
+
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: 13px;
+            line-height: 1.5;
+
+            white-space: pre-wrap;
+            word-break: break-word;
+
+            scrollbar-width: thin;
+        }
+
+        .input {
+            flex: 0 0 48px;
+            height: 48px;
+
+            display: flex;
+
+            border-top: 1px solid #20242a;
+            background: #111419;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+
+            padding: 0 16px;
+
+            border: 0;
+            outline: none;
+
+            background: transparent;
+            color: #fff;
+
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            font-size: 13px;
+        }
+
+        input::placeholder {
+            color: #6e7681;
+        }
+
+        input:disabled {
+            opacity: 0.5;
+        }
+
+        button {
+            width: 90px;
+
+            border: 0;
+
+            background: #1f6feb;
+            color: #fff;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #388bfd;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="title">
+        Консоль
+    </div>
+
+    <div class="header-right">
+        <span class="status" id="status">
+            Подключение...
+        </span>
+
+        <a class="back" href="/">
+            ← Вернуться
+        </a>
+    </div>
+</header>
+
+<div id="console"></div>
+
+<form class="input" id="commandForm">
+    <input
+        id="command"
+        type="text"
+        placeholder="Enter command..."
+        autocomplete="off"
+        disabled
+    >
+
+    <button
+        id="send"
+        type="submit"
+        disabled
+    >
+        Send
+    </button>
+</form>
+
+<script>
+    const instanceId = window.location.pathname.split("/").pop();
+
+    const output = document.getElementById("console");
+    const form = document.getElementById("commandForm");
+    const input = document.getElementById("command");
+    const send = document.getElementById("send");
+    const status = document.getElementById("status");
+
+    const protocol = location.protocol === "https:"
+        ? "wss:"
+        : "ws:";
+
+    const ws = new WebSocket(
+        `${protocol}//${location.host}/api/instances/${encodeURIComponent(instanceId)}/console`
+    );
+
+    function print(text) {
+        output.textContent += text;
+        output.scrollTop = output.scrollHeight;
+    }
+
+    ws.onopen = () => {
+        status.textContent = "Connected";
+        status.className = "status connected";
+
+        input.disabled = false;
+        send.disabled = false;
+
+        input.focus();
+
+        print("[connected]\n");
+    };
+
+    ws.onmessage = (event) => {
+        print(event.data);
+    };
+
+    ws.onerror = () => {
+        status.textContent = "Error";
+        status.className = "status error";
+
+        print("\n[websocket error]\n");
+    };
+
+    ws.onclose = () => {
+        status.textContent = "Disconnected";
+        status.className = "status error";
+
+        input.disabled = true;
+        send.disabled = true;
+
+        print("\n[disconnected]\n");
+    };
+
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const command = input.value;
+
+        if (!command || ws.readyState !== WebSocket.OPEN) {
+            return;
+        }
+
+        ws.send(command + "\n");
+
+        input.value = "";
+        input.focus();
+    });
+</script>
+
+</body>
+</html>

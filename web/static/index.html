@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>meecore</title>
+
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <b>M</b>
+            <span>meecore</span>
+        </div>
+
+        <nav>
+            <button
+                class="nav-item active"
+                data-page="instances"
+            >
+                Instances
+            </button>
+
+            <button
+                class="nav-item"
+                data-page="containers"
+            >
+                Containers
+            </button>
+
+            <button
+                class="nav-item"
+                data-page="templates"
+            >
+                Templates
+            </button>
+        </nav>
+
+        <div class="connection">
+            <i id="healthDot"></i>
+            <span id="healthText">Checking...</span>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div>
+                <small>MEECORE</small>
+                <h1 id="pageTitle">Instances</h1>
+            </div>
+
+            <div class="topbar-actions">
+
+                <button
+                    class="btn"
+                    id="refreshBtn"
+                >
+                    Refresh
+                </button>
+
+                <button
+                    class="btn primary"
+                    id="createBtn"
+                >
+                    Create instance
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- INSTANCES -->
+
+        <section
+            id="instancesPage"
+            class="page"
+        >
+
+            <div class="stats">
+
+                <div class="stat">
+                    <span>Instances</span>
+                    <strong id="instanceCount">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Running</span>
+                    <strong id="runningCount">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Stopped</span>
+                    <strong id="stoppedCount">0</strong>
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="head">
+                    <div>
+                        <h2>All instances</h2>
+                        <p>
+                            Manage your game servers and their containers.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    id="instancesState"
+                    class="state"
+                >
+                    Loading...
+                </div>
+
+                <div
+                    id="instancesTableWrap"
+                    class="table-wrap hidden"
+                >
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Node</th>
+                                <th>Template</th>
+                                <th>Container</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="instancesBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CONTAINERS -->
+
+        <section
+            id="containersPage"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="head">
+                    <div>
+                        <h2>Containers</h2>
+                        <p>
+                            Direct Docker container control.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    id="containersState"
+                    class="state"
+                >
+                    Loading...
+                </div>
+
+                <div
+                    id="containersTableWrap"
+                    class="table-wrap hidden"
+                >
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Status</th>
+                                <th>Image</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="containersBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TEMPLATES -->
+
+        <section
+            id="templatesPage"
+            class="page hidden"
+        >
+
+            <div class="card">
+
+                <div class="head">
+                    <div>
+                        <h2>Templates</h2>
+                        <p>
+                            Templates loaded by meecore.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    id="templatesGrid"
+                    class="grid"
+                ></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- CREATE INSTANCE MODAL -->
+
+<div
+    id="createModal"
+    class="modal hidden"
+>
+
+    <div
+        class="backdrop"
+        data-close-modal
+    ></div>
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+
+            <div>
+                <small>NEW INSTANCE</small>
+                <h2>Create instance</h2>
+            </div>
+
+            <button
+                class="x"
+                data-close-modal
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="createForm">
+
+            <label>
+                Name
+
+                <input
+                    id="nameInput"
+                    required
+                    maxlength="100"
+                    placeholder="My Minecraft server"
+                >
+            </label>
+
+
+            <label>
+                Node
+
+                <select
+                    id="nodeSelect"
+                    required
+                ></select>
+            </label>
+
+
+            <label>
+                Template
+
+                <select
+                    id="templateSelect"
+                    required
+                ></select>
+            </label>
+
+
+            <div
+                id="customNote"
+                class="hint hidden"
+            >
+                Custom creation is not supported by the current backend yet.
+                The API currently accepts loaded templates only.
+            </div>
+
+
+            <div
+                id="formError"
+                class="error hidden"
+            ></div>
+
+
+            <footer>
+
+                <button
+                    type="button"
+                    class="btn"
+                    data-close-modal
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn primary"
+                    id="submitCreate"
+                >
+                    Create
+                </button>
+
+            </footer>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<div
+    id="toast"
+    class="toast hidden"
+></div>
+
+
+<script src="/app.js"></script>
+
+</body>
+</html>

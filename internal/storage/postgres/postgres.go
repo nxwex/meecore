@@ -61,3 +61,41 @@ func (s *Storage) Get(ctx context.Context, id int64) (*node.Node, error) {
 
 	return n, nil
 }
+
+func (s *Storage) GetAll(ctx context.Context) ([]node.Node, error) {
+	raw := `
+		SELECT id, name, hostname, ip_address, created_at
+		FROM nodes
+		ORDER BY id
+	`
+
+	rows, err := s.db.Query(ctx, raw)
+	if err != nil {
+		return nil, fmt.Errorf("get nodes: %w", err)
+	}
+	defer rows.Close()
+
+	nodes := make([]node.Node, 0)
+
+	for rows.Next() {
+		var n node.Node
+
+		if err := rows.Scan(
+			&n.ID,
+			&n.Name,
+			&n.Hostname,
+			&n.IPAddress,
+			&n.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("scan node: %w", err)
+		}
+
+		nodes = append(nodes, n)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("get nodes rows: %w", err)
+	}
+
+	return nodes, nil
+}

@@ -1,0 +1,21 @@
+name: minecraft
+display_name: Minecraft
+image: itzg/minecraft-server
+
+env:
+  - name: EULA
+    required: true
+    default: "TRUE"
+
+  - name: VERSION
+    default: latest
+
+  - name: ENABLE_RCON
+    default: "true"
+
+ports:
+  - container: 25565
+    protocol: tcp
+
+volumes:
+  - container: /data
